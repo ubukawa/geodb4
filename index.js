@@ -74,6 +74,7 @@ const queue = new Queue(async (t, cb) => {
     const [z, x, y] = tile
     const tmpPath = `${mbtilesDir}/part-${z}-${x}-${y}.mbtiles`
     const dstPath = `${mbtilesDir}/${z}-${x}-${y}.mbtiles`
+    const clipbbox = tilebelt.tileToBBOX([x, y, z])
 
     keyInProgress.push(key)
     console.log(`[${keyInProgress}] in progress`)
@@ -85,7 +86,7 @@ const queue = new Queue(async (t, cb) => {
         '--no-tile-size-limit',
         '--force',
         '--simplification=2',
-        //boundinb box or tile will be added
+        `--clip-bounding-box=${clipbbox.join(',')}`, 
         '--quiet',
         `--minimum-zoom=${minzoom}`,
         `--maximum-zoom=${maxzoom}`
