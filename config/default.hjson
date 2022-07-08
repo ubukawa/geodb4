@@ -2,7 +2,7 @@
     minzoom: 1
     maxzoom: 5
     srcdb:  {
-        url: test_area.gdb
+        url: test_area_z4_8_9.gdb
         layer: elev
         minzoom: 1
         maxzoom: 6
@@ -30,7 +30,7 @@
     dstDir: zxy
     concurrent: 3
     maxRetries: 3
-    retryDelay: 500
+    retryDelay: 5000
     mbtilesDir: mbtiles
     spinnerString: 15
 }

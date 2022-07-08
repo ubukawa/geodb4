@@ -18,9 +18,12 @@
   },
   "homepage": "https://github.com/ubukawa/geodb4#readme",
   "dependencies": {
+    "@mapbox/tilebelt": "^1.0.2",
     "better-queue": "^3.8.10",
     "child_process": "^1.0.2",
     "config": "^3.3.7",
+    "fs": "^0.0.1-security",
+    "hjson": "^3.2.2",
     "json-text-sequence": "^1.0.1"
   }
 }
