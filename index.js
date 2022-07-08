@@ -20,7 +20,7 @@ const isIdle = () => {
 }
 
 
-const dumpAndModify = async(downstream, key, tile) => {
+const dumpAndModify = async(downstream, tile) => {
     return new Promise((resolve, reject) =>{
         //from here
         const parser = new Parser()
@@ -51,7 +51,7 @@ const dumpAndModify = async(downstream, key, tile) => {
         ])
         ogr2ogr.on('exit', () => {
             let nowTime = new Date()
-            console.log(`${key}: GDAL reading ends at ${nowTime}:\n`)
+            //console.log(`${key}: GDAL reading ends at ${nowTime}:\n`)
         })
 
         ogr2ogr.stdout.pipe(parser)
@@ -101,7 +101,7 @@ const queue = new Queue(async (t, cb) => {
         await sleep(5000)
     }
     try {
-        await dumpAndModify(tippecanoe.stdin, key, tile)
+        await dumpAndModify(tippecanoe.stdin, tile)
     } catch(e) {
         cb(true)
     }
