@@ -30,7 +30,14 @@ const dumpAndModify = async(downstream, tile) => {
                     minzoom: srcdb.minzoom,
                     maxzoom: srcdb.maxzoom
                 }
-                //delete f.geometry
+                delete f.properties.SHAPE_Length 
+                if ((f.properties.contour % 100) == 0){
+                    f.tippecanoe.minzoom = srcdb.minzoom
+                } else if ((f.properties.contour % 40) == 0){
+                    f.tippecanoe.minzoom = srcdb.minzoom + 1
+                } else {
+                    f.tippecanoe.minzoom = srcdb.minzoom + 2
+                }
                 downstream.write(`\x1e${JSON.stringify(f)}\n`)
             })
             .on('finish', () => {
