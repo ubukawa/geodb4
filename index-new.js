@@ -19,32 +19,63 @@ const isIdle = () => {
     return idle
 }
 
+const noPressureWrite = (downstream, f) => {
+    return new Promise((res) => {
+        if (downstream.write(`\x1e${JSON.stringify(f)}\n`)) {
+            res()
+        } else {
+            downstream.once('drain', () => {
+                res()
+            })
+        }
+    })
+}
+
+const fetch = (parser, srcdb, downstream) =>{
+    return new Promise((resolve, reject) =>{
+        let count = 0
+        let features = []
+        parser
+        .on('data', f => {
+            f.tippecanoe = {
+                layer: srcdb.layer,
+                minzoom: srcdb.minzoom,
+                maxzoom: srcdb.maxzoom
+            }
+            delete f.properties.SHAPE_Length 
+            if ((f.properties.contour % 100) == 0){
+                f.tippecanoe.minzoom = srcdb.minzoom
+            } else if ((f.properties.contour % 40) == 0){
+                f.tippecanoe.minzoom = srcdb.minzoom + 1
+            } else {
+                f.tippecanoe.minzoom = srcdb.minzoom + 2
+            }
+            count++
+            if (f) features.push(f)
+            //downstream.write(`\x1e${JSON.stringify(f)}\n`)
+        })
+        .on('error', err => {
+            console.error(err.stack)
+            reject()
+        })
+        .on('finish', async () => {
+            for (f of features) {
+                try {
+                    await noPressureWrite(downstream, f)
+                } catch (e) {
+                    reject(e)
+                }
+            }
+            resolve(count)
+        })
+    })
+}
+
 
 const dumpAndModify = async(downstream, tile) => {
     return new Promise((resolve, reject) =>{
         //from here
         const parser = new Parser()
-            .on('data', f => {
-                f.tippecanoe = {
-                    layer: srcdb.layer,
-                    minzoom: srcdb.minzoom,
-                    maxzoom: srcdb.maxzoom
-                }
-                delete f.properties.SHAPE_Length 
-                if ((f.properties.contour % 100) == 0){
-                    f.tippecanoe.minzoom = srcdb.minzoom
-                } else if ((f.properties.contour % 40) == 0){
-                    f.tippecanoe.minzoom = srcdb.minzoom + 1
-                } else {
-                    f.tippecanoe.minzoom = srcdb.minzoom + 2
-                }
-                downstream.write(`\x1e${JSON.stringify(f)}\n`)
-            })
-            .on('finish', () => {
-                downstream.end()
-                resolve() //check
-            }
-            )
         const [z, x, y] = tile
         const bbox = tilebelt.tileToBBOX([x, y, z])     
         var ogr2ogr = spawn(ogr2ogrPath, [
@@ -61,7 +92,10 @@ const dumpAndModify = async(downstream, tile) => {
             //console.log(`${key}: GDAL reading ends at ${nowTime}:\n`)
         })
 
-        ogr2ogr.stdout.pipe(parser)
+        await fetch(parser, srcdb, downstream)
+        resolve()
+
+        //ogr2ogr.stdout.pipe(parser)
         //until here
     })
 }
