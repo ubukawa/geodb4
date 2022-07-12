@@ -1,4 +1,7 @@
 node_modules
 test_area_z4_8_9.gdb
 mbtiles/*
+mbtiles2/*
+geojsons/*
 small-data
+test00*.js

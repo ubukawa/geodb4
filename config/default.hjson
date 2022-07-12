@@ -299,6 +299,7 @@
     concurrent: 4
     maxRetries: 3
     retryDelay: 5000
-    mbtilesDir: mbtiles
+    mbtilesDir: mbtiles2
+    geojsonsDir: geojsons
     spinnerString: 15
 }
